@@ -1,11 +1,14 @@
 // CONSTANTS
 
 const OPERATORS = {
-    "!" : 3, // Negation
-    "|" : 2, // Disjunction
-    "&" : 2, // Conjunction
-    ">" : 1, // Conditional
-    "-" : 1, // Biconditional
+    "¬" : 3, // Negation
+    "∨" : 2, // Disjunction
+    "∧" : 2, // Conjunction
+    "→" : 1, // Conditional
+    "↔" : 1, // Biconditional
+    "⊻" : 1, // Exclusive disjuntion
+    "↓" : 1, // Pierce
+    "↑" : 1, // Sheffer
 }
 
 const SEPARATORS = {
@@ -13,7 +16,9 @@ const SEPARATORS = {
     ")" : 1,
 }
 
-function func(){
+create_buttons()
+
+function main(){
     let expre = document.getElementById("expre").value;
 
     let [tokens, propositions] = tokenizator(expre);
@@ -31,6 +36,30 @@ document.getElementById("expre")
         document.getElementById("sub-btn").click();
     }
 });
+
+
+function create_buttons(){
+    for (const ope in OPERATORS) {
+        let btn = document.createElement("button");
+
+        // Add the funtionality of insert text in the end of the input element
+        btn.onclick = function() {
+
+            // Get the input entry
+            input = document.getElementById('expre');
+            input.value += ope;
+            const end = input.value.length;
+
+            input.setSelectionRange(end, end);
+            input.focus();
+        }
+
+
+
+        btn.textContent = ope;
+        document.getElementById("container-btns").appendChild(btn);
+    }   
+}
 
 function create_table(num_prop, prop_table){
 
@@ -79,7 +108,7 @@ function create_table(num_prop, prop_table){
     }
 
     // Adding the entire table to the body tag
-    document.getElementById("container").appendChild(table);
+    document.getElementById("container-table").appendChild(table);
 }
 
 function isalpha(str) {
@@ -241,7 +270,47 @@ function biconditional(prop1, prop2){
         }
     }
     return res;
+}
+
+function exclusive_disjuntion(prop1, prop2){
+    let res = [];
+    for (let i = 0; i < prop1.length; i++){
+        if (prop1[i] != prop2[i]){
+            res.push(1);
+        }
+        else{
+            res.push(0);
+        }
     }
+    return res;
+}
+
+function pierce(prop1, prop2){
+    let res = [];
+    for (let i = 0; i < prop1.length; i++){
+        if (prop1[i] == 0 && prop2[i] == 0){
+            res.push(1);
+        }
+        else{
+            res.push(0);
+        }
+    }
+    return res;
+}
+
+function sheffer(prop1, prop2){
+    let res = [];
+    for (let i = 0; i < prop1.length; i++){
+        if (prop1[i] == 1 && prop2[i] == 1){
+            res.push(1);
+        }
+        else{
+            res.push(0);
+        }
+    }
+    return res;
+}
+
 
 function negation(prop1){
     let res = [];
@@ -271,27 +340,39 @@ function evaluate(rpn, propositions){
             stack.push(rpn[i]);
         }
         // Assert operation different to the negation
-        else if (rpn[i][0] != "!"){
+        else if (rpn[i][0] != "¬"){
             // Get the propositions
             let ope2 = stack.pop();
             let ope1 = stack.pop(); 
 
             // Apply the operations
-            if (rpn[i][0] == "&"){
-                table["{0}&{1}".format(ope1[0], ope2[0])] = conjunction(table[ope1[0]], table[ope2[0]]);
-                stack.push(["{0}&{1}".format(ope1[0], ope2[0]), "prop"]);
+            if (rpn[i][0] == "∧"){
+                table["{0}∧{1}".format(ope1[0], ope2[0])] = conjunction(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}∧{1}".format(ope1[0], ope2[0]), "prop"]);
             }
-            else if (rpn[i][0] == "|"){
-                table["{0}|{1}".format(ope1[0], ope2[0])] = disjunction(table[ope1[0]], table[ope2[0]]);
-                stack.push(["{0}|{1}".format(ope1[0], ope2[0]), "prop"]);
+            else if (rpn[i][0] == "∨"){
+                table["{0}∨{1}".format(ope1[0], ope2[0])] = disjunction(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}∨{1}".format(ope1[0], ope2[0]), "prop"]);
             }
-            else if (rpn[i][0] == ">"){
-                table["{0}>{1}".format(ope1[0], ope2[0])] = conditional(table[ope1[0]], table[ope2[0]]);
-                stack.push(["{0}>{1}".format(ope1[0], ope2[0]), "prop"]);
+            else if (rpn[i][0] == "→"){
+                table["{0}→{1}".format(ope1[0], ope2[0])] = conditional(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}→{1}".format(ope1[0], ope2[0]), "prop"]);
             }
-            else if (rpn[i][0] == "-"){
-                table["{0}-{1}".format(ope1[0], ope2[0])] = biconditional(table[ope1[0]], table[ope2[0]]);
-                stack.push(["{0}-{1}".format(ope1[0], ope2[0]), "prop"]);
+            else if (rpn[i][0] == "↔"){
+                table["{0}↔{1}".format(ope1[0], ope2[0])] = biconditional(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}↔{1}".format(ope1[0], ope2[0]), "prop"]);
+            }
+            else if (rpn[i][0] == "⊻"){
+                table["{0}⊻{1}".format(ope1[0], ope2[0])] = exclusive_disjuntion(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}⊻{1}".format(ope1[0], ope2[0]), "prop"]);
+            }
+            else if (rpn[i][0] == "↓"){
+                table["{0}↓{1}".format(ope1[0], ope2[0])] = pierce(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}↓{1}".format(ope1[0], ope2[0]), "prop"]);
+            }
+            else if (rpn[i][0] == "↑"){
+                table["{0}↑{1}".format(ope1[0], ope2[0])] = pierce(table[ope1[0]], table[ope2[0]]);
+                stack.push(["{0}↑{1}".format(ope1[0], ope2[0]), "prop"]);
             }
         }
 
@@ -299,8 +380,8 @@ function evaluate(rpn, propositions){
             // Get the proposition
             ope1 = stack.pop();
 
-            table["!{0}".format(ope1[0])] = negation(table[ope1[0]]);
-            stack.push(["!{0}".format(ope1[0]), "prop"]);
+            table["¬{0}".format(ope1[0])] = negation(table[ope1[0]]);
+            stack.push(["¬{0}".format(ope1[0]), "prop"]);
         }
     }
     return table[stack.pop()[0]];
