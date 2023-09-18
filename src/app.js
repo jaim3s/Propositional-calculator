@@ -24,7 +24,7 @@ function main(){
     let [tokens, propositions] = tokenizator(expre);
     let rpn = shunting_yard(tokens);
     let res = evaluate(rpn, propositions);
-    console.log(res);
+    console.log(table);
     create_table(propositions.length, table);
 }
 
